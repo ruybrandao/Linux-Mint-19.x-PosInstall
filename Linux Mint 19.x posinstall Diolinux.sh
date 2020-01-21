@@ -75,12 +75,16 @@ wget -c "$URL_INSYNC"              -P "$DIRETORIO_DOWNLOADS"
 ## Instalando pacotes .deb baixados na sessão anterior ##
 sudo dpkg -i $DIRETORIO_DOWNLOADS/*.deb
 
+# Armazena nome do pacotes já instalados no sistema (flag 'ii')
+LISTA_INSTALADOS=($(dpkg -l ${PROGRAMAS_PARA_INSTALAR[@]} 2> /dev/null | awk '/^ii/ {print $2}'))
+echo "[ Pacotes já instalados ]"
+echo ${LISTA_INSTALADOS[@]}
+
 # Instalar programas no apt
+echo "[ Instalando pacotes ]"
 for nome_do_programa in ${PROGRAMAS_PARA_INSTALAR[@]}; do
-  if ! dpkg -l | grep -q $nome_do_programa; then # Só instala se já não estiver instalado
+  if ! echo ${LISTA_INSTALADOS[@]} | grep -qP "${nome_do_programa}(?!:i386)"; then # Só instala se já não estiver instalado
     apt install "$nome_do_programa" -y
-  else
-    echo "[INSTALADO] - $nome_do_programa"
   fi
 done
 
